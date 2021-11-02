@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +11,9 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using PirateShipCollection.Filters;
+using PirateShipCollection.Logic;
+using PirateShipCollection.Repositories;
+using DbContext = PirateShipCollection.Repositories.DbContext;
 
 namespace PirateShipCollection
 {
@@ -43,8 +47,10 @@ namespace PirateShipCollection
             services
                 .AddMvc(options =>
                 {
-                    options.InputFormatters.RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonInputFormatter>();
-                    options.OutputFormatters.RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonOutputFormatter>();
+                    options.InputFormatters
+                        .RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonInputFormatter>();
+                    options.OutputFormatters
+                        .RemoveType<Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonOutputFormatter>();
                 })
                 .AddNewtonsoftJson(opts =>
                 {
@@ -64,7 +70,6 @@ namespace PirateShipCollection
                         Description = "Swashbuckling Buccaneer Pirate Store",
                     });
                     c.CustomSchemaIds(type => type.FullName);
-                    c.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{_hostingEnv.ApplicationName}.xml");
                     // Sets the basePath property in the Swagger document generated
                     c.DocumentFilter<BasePathFilter>("/v2");
 
@@ -72,6 +77,25 @@ namespace PirateShipCollection
                     // Use [ValidateModelState] on Actions to actually validate it in C# as well!
                     c.OperationFilter<GeneratePathParamsValidationFilter>();
                 });
+
+            services.AddTransient<IShipRepository, ShipRepository>();
+            services.AddTransient<IShipLogic, ShipLogic>();
+            services.AddTransient<IDevLogic, DevLogic>();
+
+            services.AddScoped<DbContext, DbContext>();
+
+            try
+            {
+                services.AddDbContext<DbContext>(options =>
+                {
+                    var connectionString = Configuration["ConnectionString"];
+                    options.UseSqlServer(connectionString);
+                });
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Adding DB Context failed", e);
+            }
         }
 
         /// <summary>
@@ -86,9 +110,7 @@ namespace PirateShipCollection
 
             //TODO: Uncomment this if you need wwwroot folder
             // app.UseStaticFiles();
-
             app.UseAuthorization();
-
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -101,12 +123,7 @@ namespace PirateShipCollection
 
             //TODO: Use Https Redirection
             // app.UseHttpsRedirection();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -115,7 +132,6 @@ namespace PirateShipCollection
             {
                 //TODO: Enable production exception handling (https://docs.microsoft.com/en-us/aspnet/core/fundamentals/error-handling)
                 app.UseExceptionHandler("/Error");
-                
                 app.UseHsts();
             }
         }

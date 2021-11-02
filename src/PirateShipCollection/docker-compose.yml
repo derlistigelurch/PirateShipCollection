@@ -1,0 +1,28 @@
+﻿# docker-compose.override.yml
+
+#
+version: '3.4'
+services: 
+  
+  ship-collection:
+    image: mcr.microsoft.com/dotnet/sdk:5.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ConnectionString=Initial Catalog=SWE;User=sa;Password=pass@word1;Data Source=localhost;MultipleActiveResultSets=True
+      - Port=89
+    # Additional environment variables for this service
+    ports:
+      - "5101:89"
+    depends_on: 
+      - sql
+        
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=pass@word1
+    ports:
+      - "1433:1433"
+    
