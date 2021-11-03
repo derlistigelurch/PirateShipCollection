@@ -16,7 +16,7 @@ namespace PirateShipCollection.Repositories
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Ship>().HasKey(s => s.Id);
+            modelBuilder.Entity<Ship>().HasKey(s => s.DbId);
         }
 
         public virtual DbSet<Ship> Ships { get; set; }
