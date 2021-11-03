@@ -1,18 +1,17 @@
+# Get the base image
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build-env
 WORKDIR /app
 
-ENV DOTNET_CLI_TELEMETRY_OPTOUT 1
-
-# copy csproj and restore as distinct layers
+# Copy the csproj and restore all of the nugets
 COPY *.csproj ./
 RUN dotnet restore
 
-# copy everything else and build
+# Copy everything else and build
 COPY . ./
 RUN dotnet publish -c Release -o out
 
-# build runtime image
+# Build runtime image
 FROM mcr.microsoft.com/dotnet/sdk:5.0
 WORKDIR /app
 COPY --from=build-env /app/out .
-ENTRYPOINT ["dotnet", "PirateShipCollection.dll"]
+ENTRYPOINT ["dotnet", "PirateShipCollection.dll", "--server.urls", "http://+:5000"]
