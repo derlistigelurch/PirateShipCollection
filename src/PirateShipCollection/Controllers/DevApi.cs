@@ -11,26 +11,10 @@ namespace PirateShipCollection.Controllers
     public class DevApiController : ControllerBase
     {
         private readonly IDevLogic _devLogic;
-        private readonly BadRequestObjectResult _badRequestResult;
-        private readonly OkObjectResult _okRequestResult;
 
         public DevApiController(IDevLogic devLogic)
         {
             _devLogic = devLogic;
-            _badRequestResult = new BadRequestObjectResult(
-                new ApiResponse
-                {
-                    Code = 400,
-                    Message = "Uuuuups.... something went wrong :D",
-                    Type = "Error"
-                });
-            _okRequestResult = new OkObjectResult(
-                new ApiResponse
-                {
-                    Code = 200,
-                    Message = "Operation successfull",
-                    Type = "Success"
-                });
         }
 
         /// <summary>
@@ -44,9 +28,21 @@ namespace PirateShipCollection.Controllers
         [SwaggerOperation("FillDatabase")]
         public virtual IActionResult FillDatabase()
         {
-            return _devLogic.FillDatabase() > 0
-                ? _okRequestResult
-                : _badRequestResult;
+            try
+            {
+                _devLogic.FillDatabase();
+                return new OkResult();
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(
+                    new ApiResponse
+                    {
+                        Code = 400,
+                        Message = e.Message,
+                        Type = "Dev"
+                    });
+            }
         }
 
         /// <summary>
@@ -60,8 +56,21 @@ namespace PirateShipCollection.Controllers
         [SwaggerOperation("ResetDatabase")]
         public virtual IActionResult ResetDatabase()
         {
-            _devLogic.DeleteDatabase();
-            return new OkResult();
+            try
+            {
+                _devLogic.DeleteDatabase();
+                return new OkResult();
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(
+                    new ApiResponse
+                    {
+                        Code = 400,
+                        Message = e.Message,
+                        Type = "Dev"
+                    });
+            }
         }
     }
 }

@@ -14,26 +14,10 @@ namespace PirateShipCollection.Controllers
     public class ShipApiController : ControllerBase
     {
         private readonly IShipLogic _shipLogic;
-        private readonly BadRequestObjectResult _badRequestResult;
-        private readonly OkObjectResult _okRequestResult;
 
         public ShipApiController(IShipLogic shipLogic)
         {
             _shipLogic = shipLogic;
-            _badRequestResult = new BadRequestObjectResult(
-                new ApiResponse
-                {
-                    Code = 400,
-                    Message = "Uuuuups.... something went wrong :D",
-                    Type = "Error"
-                });
-            _okRequestResult = new OkObjectResult(
-                new ApiResponse
-                {
-                    Code = 200,
-                    Message = "Operation successfull",
-                    Type = "Success"
-                });
         }
 
         /// <summary>
@@ -48,10 +32,21 @@ namespace PirateShipCollection.Controllers
         [SwaggerOperation("AddShip")]
         public virtual IActionResult AddShip([FromBody] Ship body)
         {
-            var id = _shipLogic.CreateShip(body);
-            return id > 0
-                ? new OkObjectResult(new ApiResponse { Code = 200, Message = id.ToString() })
-                : _badRequestResult;
+            try
+            {
+                var id = _shipLogic.CreateShip(body);
+                return new OkObjectResult(new ApiResponse { Code = 200, Message = id.ToString() });
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(
+                    new ApiResponse
+                    {
+                        Code = 400,
+                        Message = e.Message,
+                        Type = "Ship"
+                    });
+            }
         }
 
         /// <summary>
@@ -66,9 +61,21 @@ namespace PirateShipCollection.Controllers
         [SwaggerOperation("DeleteShip")]
         public virtual IActionResult DeleteShip([FromRoute] [Required] int shipId)
         {
-            return _shipLogic.DeleteShip(shipId) > 0
-                ? _okRequestResult
-                : _badRequestResult;
+            try
+            {
+                _shipLogic.DeleteShip(shipId);
+                return new OkResult();
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(
+                    new ApiResponse
+                    {
+                        Code = 400,
+                        Message = e.Message,
+                        Type = "Ship"
+                    });
+            }
         }
 
         /// <summary>
@@ -85,10 +92,21 @@ namespace PirateShipCollection.Controllers
         [SwaggerResponse(statusCode: 200, type: typeof(Ship), description: "successful operation")]
         public virtual IActionResult GetShipById([FromRoute] [Required] int shipId)
         {
-            var ship = _shipLogic.GetShipById(shipId);
-            return ship is null
-                ? _badRequestResult
-                : new OkObjectResult(ship);
+            try
+            {
+                var ship = _shipLogic.GetShipById(shipId);
+                return new OkObjectResult(ship);
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(
+                    new ApiResponse
+                    {
+                        Code = 400,
+                        Message = e.Message,
+                        Type = "Ship"
+                    });
+            }
         }
 
         /// <summary>
@@ -103,9 +121,21 @@ namespace PirateShipCollection.Controllers
         [SwaggerOperation("UpdateShip")]
         public virtual IActionResult UpdateShip([FromBody] Ship body)
         {
-            return _shipLogic.UpdateShip(body) > 0
-                ? _okRequestResult
-                : _badRequestResult;
+            try
+            {
+                _shipLogic.UpdateShip(body);
+                return new OkResult(); 
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(
+                    new ApiResponse
+                    {
+                        Code = 400,
+                        Message = e.Message,
+                        Type = "Ship"
+                    });
+            }
         }
     }
 }
