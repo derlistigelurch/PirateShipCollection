@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using PirateShipCollection.Models;
 
@@ -15,49 +16,64 @@ namespace PirateShipCollection.Repositories
             _logger = logger;
         }
 
-        public int Create(Ship ship)
+        public void Create(Ship ship)
         {
+            _logger.LogInformation("Adding a new ship to the collection.");
             _dbContext.Ships.Add(ship);
-            return _dbContext.SaveChanges() > 0
-                ? ship.Id
-                : -1;
+            _dbContext.SaveChanges();
         }
 
-        public int Update(Ship ship)
+        public void Update(Ship ship)
         {
-            var oldShip = GetByCode(ship.Code);
+            _logger.LogInformation("Updating a ship in the collection.");
+
+            var oldShip = GetById(ship.Id);
+            ship.DbId = oldShip.DbId;
             _dbContext.Entry(oldShip).CurrentValues.SetValues(ship);
-            return _dbContext.SaveChanges();
+
+            _dbContext.SaveChanges();
         }
 
-        public int Delete(int id)
+        public void Delete(int id)
         {
+            _logger.LogInformation("Remove a ship from the collection.");
+
             var ship = GetById(id);
-            if (ship is null)
-                return -1;
-
             _dbContext.Ships.Remove(ship);
-            return _dbContext.SaveChanges();
+
+            _dbContext.SaveChanges();
         }
 
-        public Ship? GetById(int id)
+        public Ship GetById(int id)
         {
-            return _dbContext.Ships.SingleOrDefault(s => s.Id == id);
+            _logger.LogInformation("Get ship by id.");
+            var ship = _dbContext.Ships.SingleOrDefault(s => s.Id == id);
+            if (ship is not null)
+                return ship;
+
+            _logger.LogWarning($"Ship not found.{Environment.NewLine}Id: {id}");
+            throw new Exception("Ship not found.");
         }
 
         public void DeleteDatabase()
         {
+            _dbContext.Database.EnsureCreated();
+
+            _logger.LogInformation("Delete database.");
             _dbContext.Database.EnsureDeleted();
+
+            _logger.LogInformation("Create database.");
             _dbContext.Database.EnsureCreated();
         }
 
-        public int FillDatabase()
+        public void FillDatabase()
         {
+            _logger.LogInformation("Fill database with values for testing.");
             var ships = new[]
             {
                 new Ship()
                 {
-                    Code = 1,
+                    Id = 1,
                     Category = "Big ship",
                     Name = "Gud ship",
                     Height = 100,
@@ -67,7 +83,7 @@ namespace PirateShipCollection.Repositories
                 },
                 new Ship()
                 {
-                    Code = 2,
+                    Id = 2,
                     Category = "Small ship",
                     Name = "Kanuuu",
                     Height = 13,
@@ -77,7 +93,7 @@ namespace PirateShipCollection.Repositories
                 },
                 new Ship()
                 {
-                    Code = 3,
+                    Id = 3,
                     Category = "Damaged ship",
                     Name = "Damaged ship",
                     Height = 30,
@@ -87,7 +103,7 @@ namespace PirateShipCollection.Repositories
                 },
                 new Ship()
                 {
-                    Code = 4,
+                    Id = 4,
                     Category = "Tiny ship",
                     Name = "Black Mongoose",
                     Height = 33,
@@ -98,12 +114,7 @@ namespace PirateShipCollection.Repositories
             };
 
             _dbContext.Ships.AddRange(ships);
-            return _dbContext.SaveChanges();
-        }
-
-        private Ship? GetByCode(int code)
-        {
-            return _dbContext.Ships.FirstOrDefault(s => s.Code == code);
+            _dbContext.SaveChanges();
         }
     }
 }
