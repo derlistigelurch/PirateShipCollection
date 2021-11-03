@@ -1,11 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using PirateShipCollection.Attributes;
 using PirateShipCollection.Logic;
 using PirateShipCollection.Models;
-using PirateShipCollection.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PirateShipCollection.Controllers
@@ -34,8 +32,8 @@ namespace PirateShipCollection.Controllers
         {
             try
             {
-                var id = _shipLogic.CreateShip(body);
-                return new OkObjectResult(new ApiResponse { Code = 200, Message = id.ToString() });
+                _shipLogic.CreateShip(body);
+                return new OkResult();
             }
             catch (Exception e)
             {
@@ -124,7 +122,7 @@ namespace PirateShipCollection.Controllers
             try
             {
                 _shipLogic.UpdateShip(body);
-                return new OkResult(); 
+                return new OkResult();
             }
             catch (Exception e)
             {
