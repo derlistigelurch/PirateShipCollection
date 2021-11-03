@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PirateShipCollection.Attributes;
 using PirateShipCollection.Logic;
 using PirateShipCollection.Models;
@@ -11,10 +12,12 @@ namespace PirateShipCollection.Controllers
     public class DevApiController : ControllerBase
     {
         private readonly IDevLogic _devLogic;
+        private readonly ILogger<DevLogic> _logger;
 
-        public DevApiController(IDevLogic devLogic)
+        public DevApiController(IDevLogic devLogic, ILogger<DevLogic> logger)
         {
             _devLogic = devLogic;
+            _logger = logger;
         }
 
         /// <summary>
@@ -35,13 +38,8 @@ namespace PirateShipCollection.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(
-                    new ApiResponse
-                    {
-                        Code = 400,
-                        Message = e.Message,
-                        Type = "Dev"
-                    });
+                _logger.LogWarning(e.Message);
+                throw;
             }
         }
 
@@ -63,13 +61,8 @@ namespace PirateShipCollection.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(
-                    new ApiResponse
-                    {
-                        Code = 400,
-                        Message = e.Message,
-                        Type = "Dev"
-                    });
+                _logger.LogWarning(e.Message);
+                throw;
             }
         }
     }

@@ -75,7 +75,7 @@ namespace PirateShipCollection
                     c.CustomSchemaIds(type => type.FullName);
                     // Sets the basePath property in the Swagger document generated
                     c.DocumentFilter<BasePathFilter>("/v2");
-                    
+
                     c.OperationFilter<GeneratePathParamsValidationFilter>();
                 });
 
@@ -94,9 +94,10 @@ namespace PirateShipCollection
                     var user = Configuration["DbUser"] ?? "sa";
                     var password = Configuration["Password"] ?? "pass@word1";
                     var database = Configuration["Database"] ?? "shipDb";
-                   
-                   opt.UseSqlServer($"Server={server}, {port};Initial Catalog={database};User={user};Password={password}");
-                   _logger.LogInformation("Successfully added DB Context");
+
+                    opt.UseSqlServer(
+                        $"Server={server}, {port};Initial Catalog={database};User={user};Password={password}");
+                    _logger.LogInformation("Successfully added DB Context");
                 });
             }
             catch (Exception e)
@@ -113,6 +114,16 @@ namespace PirateShipCollection
         /// <param name="loggerFactory"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            if (env.IsDevelopment())
+            {
+                app.UseExceptionHandler("/ErrorDev");
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
+            }
+
             app.UseRouting();
             app.UseAuthorization();
             app.UseSwagger();
@@ -120,17 +131,8 @@ namespace PirateShipCollection
             {
                 c.SwaggerEndpoint("/swagger/1.0.0/swagger.json", "Swashbuckling Buccaneer Pirate Store");
             });
-            
+
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
 
             _logger.LogInformation("Startup Configure done");
         }

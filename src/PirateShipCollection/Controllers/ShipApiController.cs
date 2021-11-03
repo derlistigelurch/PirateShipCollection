@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PirateShipCollection.Attributes;
 using PirateShipCollection.Logic;
 using PirateShipCollection.Models;
@@ -12,10 +13,12 @@ namespace PirateShipCollection.Controllers
     public class ShipApiController : ControllerBase
     {
         private readonly IShipLogic _shipLogic;
+        private readonly ILogger<ShipApiController> _logger;
 
-        public ShipApiController(IShipLogic shipLogic)
+        public ShipApiController(IShipLogic shipLogic, ILogger<ShipApiController> logger)
         {
             _shipLogic = shipLogic;
+            _logger = logger;
         }
 
         /// <summary>
@@ -37,13 +40,8 @@ namespace PirateShipCollection.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(
-                    new ApiResponse
-                    {
-                        Code = 400,
-                        Message = e.Message,
-                        Type = "Ship"
-                    });
+                _logger.LogWarning(e.Message);
+                throw;
             }
         }
 
@@ -66,13 +64,8 @@ namespace PirateShipCollection.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(
-                    new ApiResponse
-                    {
-                        Code = 400,
-                        Message = e.Message,
-                        Type = "Ship"
-                    });
+                _logger.LogWarning(e.Message);
+                throw;
             }
         }
 
@@ -97,13 +90,8 @@ namespace PirateShipCollection.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(
-                    new ApiResponse
-                    {
-                        Code = 400,
-                        Message = e.Message,
-                        Type = "Ship"
-                    });
+                _logger.LogWarning(e.Message);
+                throw;
             }
         }
 
@@ -126,13 +114,8 @@ namespace PirateShipCollection.Controllers
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(
-                    new ApiResponse
-                    {
-                        Code = 400,
-                        Message = e.Message,
-                        Type = "Ship"
-                    });
+                _logger.LogWarning(e.Message);
+                throw;
             }
         }
     }
