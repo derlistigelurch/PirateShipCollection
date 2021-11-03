@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using PirateShipCollection.Models;
 using PirateShipCollection.Repositories;
 
@@ -15,24 +16,33 @@ namespace PirateShipCollection.Logic
             _logger = logger;
         }
 
-        public int CreateShip(Ship ship)
+        public void CreateShip(Ship ship)
         {
-            return _shipRepository.Create(ship);
+            _logger.LogInformation($"Create ship.{Environment.NewLine}Ship:{Environment.NewLine}{ship}");
+            _shipRepository.Create(ship);
         }
 
-        public int UpdateShip(Ship ship)
+        public void UpdateShip(Ship ship)
         {
-            return _shipRepository.Update(ship);
+            _logger.LogInformation($"Update ship.{Environment.NewLine}New ship:{Environment.NewLine}{ship}");
+            _shipRepository.Update(ship);
         }
 
-        public int DeleteShip(int shipId)
+        public void DeleteShip(int shipId)
         {
-            return _shipRepository.Delete(shipId);
+            _logger.LogInformation($"Delete ship.{Environment.NewLine}Id: {shipId}");
+            _shipRepository.Delete(shipId);
         }
 
-        public Ship? GetShipById(int shipId)
+        public Ship GetShipById(int shipId)
         {
-            return _shipRepository.GetById(shipId);
+            _logger.LogInformation($"Get ship by id.{Environment.NewLine}Id: {shipId}");
+            var ship = _shipRepository.GetById(shipId);
+            if (ship is not null)
+                return ship;
+
+            _logger.LogWarning($"Ship not found.{Environment.NewLine}Id: {shipId}");
+            throw new Exception("Ship not found");
         }
     }
 }

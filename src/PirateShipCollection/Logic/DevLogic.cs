@@ -16,12 +16,14 @@ namespace PirateShipCollection.Logic
 
         public void DeleteDatabase()
         {
+            _logger.LogInformation("Delete and re-create database.");
             _shipRepository.DeleteDatabase();
         }
 
-        public int FillDatabase()
+        public void FillDatabase()
         {
-            return _shipRepository.FillDatabase();
+            _logger.LogInformation("Fill database with test values.");
+            _shipRepository.FillDatabase();
         }
     }
 }

@@ -3,6 +3,6 @@
     public interface IDevLogic
     {
         void DeleteDatabase();
-        int FillDatabase();
+        void FillDatabase();
     }
 }
