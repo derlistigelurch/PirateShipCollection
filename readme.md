@@ -8,3 +8,18 @@ If you start the service with the provided script, the website magically opens i
 If this somehow does not work you can simply execute the `docker-compose up -d` command in your terminal.
 Once the service is running you can go on the website an start doing whatever you have to do.
 http://localhost:5000/swagger/index.html
+
+## Commands
+### dev
+post: insert testdata
+
+get: delete and re-create database
+
+### ship
+post: add ship
+
+get: read ship from the database
+
+delete: delete ship
+
+put: update ship
